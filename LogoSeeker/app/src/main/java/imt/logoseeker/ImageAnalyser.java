@@ -1,6 +1,10 @@
 package imt.logoseeker;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.res.Resources;
+
+import imt.logoseeker.R;
 
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
@@ -24,9 +28,11 @@ class ImageAnalyser {
 
     private String rootPath;
     private String pathToVocabulary;
+    private Context context;
 
-    ImageAnalyser(Activity act)
+    ImageAnalyser(Activity act, Context context)
     {
+        this.context = context;
         rootPath = act.getFilesDir().getAbsolutePath();
         pathToVocabulary = rootPath + "/vocabulary.yml" ;
     }
@@ -81,7 +87,12 @@ class ImageAnalyser {
         KeyPointVector keypoints = new KeyPointVector();
 
         Mat imageTest = imread(photoPath);
-        opencv_imgproc.resize(imageTest, imageTest, new opencv_core.Size(500, 700));
+
+        // Resizing
+        Resources resources = context.getResources();
+        opencv_core.Size newSize = getNewSize(imageTest, resources.getInteger(R.integer.MAX_IMAGE_WIDTH), resources.getInteger(R.integer.MAX_IMAGE_HEIGHT));
+        opencv_imgproc.resize(imageTest, imageTest, newSize);
+
         detector.detect(imageTest,keypoints);
         bowide.compute(imageTest, keypoints, response_hist, new opencv_core.IntVectorVector(), new Mat());
 
@@ -114,4 +125,28 @@ class ImageAnalyser {
         }
     }
 
+    private opencv_core.Size getNewSize(Mat img, int maxWidth, int maxHeight)
+    {
+        int original_width = img.cols();
+        int original_height = img.rows();
+        int new_width = original_width;
+        int new_height = original_height;
+
+        // first check if we need to scale width
+        if (original_width > maxWidth) {
+            //scale width to fit
+            new_width = maxWidth;
+            //scale height to maintain aspect ratio
+            new_height = (new_width * original_height) / original_width;
+        }
+
+        // then check if we need to scale even with the new height
+        if (new_height > maxHeight) {
+            //scale height to fit instead
+            new_height = maxHeight;
+            //scale width to maintain aspect ratio
+            new_width = (new_height * original_width) / original_height;
+        }
+        return new opencv_core.Size(new_width,new_height);
+    }
 }

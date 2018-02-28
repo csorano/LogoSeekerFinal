@@ -23,6 +23,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+        <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="imt.logoseeker.fileprovider"

@@ -24,7 +24,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.soundcloud.android.crop.Crop;
+
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -48,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         // Creating tools
         String url = "http://www-rech.telecom-lille.fr/freeorb/";
         volley = new VolleyInterface(this,this, url);
-        ia = new ImageAnalyser(this);
+        ia = new ImageAnalyser(this,this);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
@@ -76,6 +79,35 @@ public class MainActivity extends AppCompatActivity {
         buttonAnalysis.setOnClickListener(v -> {
             updateInterface(R.integer.UI_DISABLED);
             new AnalysisTask().execute(mCurrentPhotoPath);
+        });
+
+        ImageView imageView = (ImageView) findViewById(R.id.v_picture);
+        imageView.setOnClickListener(v -> {
+            try {
+                File file = new File(mCurrentPhotoPath);
+                String timeStamp = new SimpleDateFormat("ddMMyyyy_HHmmss", Locale.FRANCE).format(new Date());
+                String imageFileName = "CROPPED_" + timeStamp;
+
+                final String appDirectoryName = "LogoSeeker";
+                final File storageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), appDirectoryName);
+                //noinspection ResultOfMethodCallIgnored
+                storageDir.mkdirs();
+                File tempImage = File.createTempFile(
+                        imageFileName,  /* prefix */
+                        ".jpg",         /* suffix */
+                        storageDir      /* directory */
+                );
+
+                Uri uri = Uri.fromFile(file);
+                Uri uriCropped = Uri.fromFile(tempImage);
+                mCurrentPhotoPath = tempImage.getAbsolutePath();
+
+                Crop.of(uri, uriCropped).start(this);
+            }
+            catch(Exception ex)
+            {
+                Toast.makeText(this,"Error during cropping",Toast.LENGTH_LONG).show();
+            }
         });
     }
 
@@ -197,6 +229,18 @@ public class MainActivity extends AppCompatActivity {
                 ImageView img = (ImageView) findViewById(R.id.v_picture);
                 img.setImageBitmap(BitmapFactory.decodeFile(picturePath));
             }
+        }
+
+        // Crop
+        if (requestCode == Crop.REQUEST_CROP && resultCode == RESULT_OK) {
+            ImageView img = (ImageView) findViewById(R.id.v_picture);
+
+            Bitmap imageBitmap = BitmapFactory.decodeFile(mCurrentPhotoPath,new BitmapFactory.Options());
+            img.setImageBitmap(imageBitmap);
+
+            Toast.makeText(MainActivity.this, "Photo cropped", Toast.LENGTH_SHORT).show();
+
+            galleryAddPic();
         }
     }
 
