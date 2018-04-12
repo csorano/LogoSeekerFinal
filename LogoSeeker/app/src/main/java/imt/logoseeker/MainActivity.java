@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Creating tools
-        String url = "http://www-rech.telecom-lille.fr/freeorb/";
+        String url = getResources().getString(R.string.server_url);
         volley = new VolleyInterface(this,this, url);
         ia = new ImageAnalyser(this,this);
 
@@ -77,8 +78,14 @@ public class MainActivity extends AppCompatActivity {
 
         Button buttonAnalysis = (Button) findViewById(R.id.b_analysis);
         buttonAnalysis.setOnClickListener(v -> {
-            updateInterface(R.integer.UI_DISABLED);
-            new AnalysisTask().execute(mCurrentPhotoPath);
+            if(mCurrentPhotoPath != null && !Objects.equals(mCurrentPhotoPath, "")) {
+                updateInterface(R.integer.UI_DISABLED);
+                new AnalysisTask().execute(mCurrentPhotoPath);
+            }
+            else
+            {
+                Toast.makeText(this,R.string.error_image,Toast.LENGTH_LONG).show();
+            }
         });
 
         ImageView imageView = (ImageView) findViewById(R.id.v_picture);

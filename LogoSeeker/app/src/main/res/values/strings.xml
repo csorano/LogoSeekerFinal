@@ -2,5 +2,7 @@
     <string name="app_name">LogoSeeker</string>
     <string name="disabled_message">PLEASE WAIT...</string>
     <string name="enabled_message">ANALYSIS</string>
+    <string name="error_image">Veuillez sélectionner une image correcte (format JPG)</string>
     <string name="error_message">Erreur durant l\'analyse</string>
+    <string name="server_url">http://www-rech.telecom-lille.fr/freeorb/</string>
 </resources>
