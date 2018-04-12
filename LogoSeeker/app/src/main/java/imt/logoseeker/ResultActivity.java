@@ -1,5 +1,6 @@
 package imt.logoseeker;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -36,10 +37,11 @@ public class ResultActivity extends AppCompatActivity {
                 .execute("http://www-rech.telecom-lille.fr/freeorb/train-images/" + brand.getImages()[0]);
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
 
-        public DownloadImageTask(ImageView bmImage) {
+        DownloadImageTask(ImageView bmImage) {
             this.bmImage = bmImage;
         }
 
